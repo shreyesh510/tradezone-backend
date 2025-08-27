@@ -23,7 +23,7 @@ export class FirebaseConfig implements OnModuleInit {
       // Path to your new service account key file
       const serviceAccountPath = path.join(
         process.cwd(),
-        'tradeinzone-1a8b1-firebase-adminsdk- fbsvc-ad8db35560.json'
+        'tradeinzone-1a8b1-firebase-adminsdk-fbsvc-ad8db35560.json'
       );
 
       // Initialize Firebase Admin SDK
