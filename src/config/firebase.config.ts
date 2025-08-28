@@ -20,15 +20,26 @@ export class FirebaseConfig implements OnModuleInit {
         return;
       }
 
-      // Path to your new service account key file
-      const serviceAccountPath = path.join(
-        process.cwd(),
-        'tradeinzone-1a8b1-firebase-adminsdk-fbsvc-ad8db35560.json'
-      );
+      let credential;
+      
+      // Check if we're in production (Render) and have environment variables
+      if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        console.log('🔥 Using Firebase credentials from environment variables');
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        credential = admin.credential.cert(serviceAccount);
+      } else {
+        // Fallback to local file for development
+        console.log('🔥 Using Firebase credentials from local file');
+        const serviceAccountPath = path.join(
+          process.cwd(),
+          'tradeinzone-1a8b1-firebase-adminsdk-fbsvc-ad8db35560.json'
+        );
+        credential = admin.credential.cert(serviceAccountPath);
+      }
 
       // Initialize Firebase Admin SDK
       this.firebaseApp = admin.initializeApp({
-        credential: admin.credential.cert(serviceAccountPath),
+        credential,
         projectId: 'tradeinzone-1a8b1',
         databaseURL: 'https://tradeinzone-1a8b1-default-rtdb.firebaseio.com',
       });
