@@ -26,6 +26,12 @@ export class FirebaseConfig implements OnModuleInit {
       if (process.env.FIREBASE_SERVICE_ACCOUNT) {
         console.log('🔥 Using Firebase credentials from environment variables');
         const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        
+        // Fix the private key by replacing literal \n with actual newlines
+        if (serviceAccount.private_key) {
+          serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+        }
+        
         credential = admin.credential.cert(serviceAccount);
       } else {
         // Fallback to local file for development
