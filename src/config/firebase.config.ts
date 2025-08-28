@@ -25,14 +25,36 @@ export class FirebaseConfig implements OnModuleInit {
       // Check if we're in production (Render) and have environment variables
       if (process.env.FIREBASE_SERVICE_ACCOUNT) {
         console.log('🔥 Using Firebase credentials from environment variables');
-        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        console.log('📝 Environment variable length:', process.env.FIREBASE_SERVICE_ACCOUNT.length);
+        console.log('📝 Environment variable preview:', process.env.FIREBASE_SERVICE_ACCOUNT.substring(0, 100) + '...');
         
-        // Fix the private key by replacing literal \n with actual newlines
-        if (serviceAccount.private_key) {
-          serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+        try {
+          const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+          
+          // Fix the private key by replacing literal \n with actual newlines
+          if (serviceAccount.private_key) {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+            console.log('🔧 Fixed private key formatting');
+          }
+          
+          // Validate the private key format
+          if (!serviceAccount.private_key.includes('-----BEGIN PRIVATE KEY-----')) {
+            throw new Error('Invalid private key format');
+          }
+          
+          credential = admin.credential.cert(serviceAccount);
+          console.log('✅ Firebase credentials loaded successfully from environment');
+        } catch (envError) {
+          console.error('❌ Error parsing environment credentials:', envError);
+          console.log('🔄 Falling back to local file...');
+          
+          // Fallback to local file if environment variable fails
+          const serviceAccountPath = path.join(
+            process.cwd(),
+            'tradeinzone-1a8b1-firebase-adminsdk-fbsvc-ad8db35560.json'
+          );
+          credential = admin.credential.cert(serviceAccountPath);
         }
-        
-        credential = admin.credential.cert(serviceAccount);
       } else {
         // Fallback to local file for development
         console.log('🔥 Using Firebase credentials from local file');
